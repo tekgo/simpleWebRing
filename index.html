@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title></title>
+	<style type="text/css">
+		
+	</style>
+</head>
+<body>
+	<p>This site is part of the cool webring club</p>
+	<a id="prev" href="" target="_top">prev</a><br/>
+	<a id="next" href="" target="_top">next</a><br/>
+	<a id="random" href="" target="_top" onclick="random();">random</a><br/>
+
+	<script type="text/javascript">
+		const sites = [
+			{
+				"id": "spa",
+				"name": "Super Party Awesome",
+				"url": "https://superpartyawesome.com",
+				"owner": "Pat"
+			},
+			{
+				"id": "tekgo",
+				"name": "Tekgo dot org",
+				"url": "https://tekgo.org",
+				"owner": "Pat2"
+			},
+			{
+				"id": "home",
+				"name": "Tekgo dot org",
+				"url": "https://sites.github.com/",
+				"owner": "Pat2"
+			}
+		];
+
+		// Get the id parameter from the url.
+		const params1 = new URLSearchParams(window.location.search);
+		const currentId = params1.get("id");
+		// Match it to an existing site.
+		let existingIndex = sites.findIndex((x) => x["id"] == currentId);
+
+		var prevURL = ""
+		var nextURL = ""
+
+		if (existingIndex != -1) {
+			// If the existing site was found
+			var prevIndex = (existingIndex + sites.length - 1) % sites.length;
+			var nextIndex = (existingIndex + 1) % sites.length;
+			prevURL = sites[prevIndex].url;
+			nextURL = sites[nextIndex].url;
+		} else {
+			// Otherwise just grab the first and second items.
+			// Maybe change this later.
+			prevURL = sites[0].url;
+			nextURL = sites[1 % sites.length].url;
+		}
+
+		document.getElementById("prev").href = prevURL;
+		document.getElementById("next").href = nextURL;
+
+		// Click handler for the random link.
+		function random() {
+			let randomIndex = 0;
+			if (sites.length > 1) {
+				randomIndex = existingIndex;
+				while(randomIndex == existingIndex) {
+					randomIndex = Math.floor(Math.random()*sites.length);
+				}
+			}
+			randomURL = sites[randomIndex].url;
+			document.getElementById("random").href = randomURL;
+			document.getElementById("random").click()
+		}
+
+	</script>
+</body>
+</html>
