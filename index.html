@@ -73,7 +73,7 @@
 			document.getElementById("noJS").style.display = "none";
 
 			// Get the id parameter from the url.
-			const params = new URLSearchParams(window.location.search);
+			const params = new URLSearchParams(window.location.hash.substr(1));
 			const currentId = params.get("id");
 			// Match it to an existing site.
 			let existingIndex = sites.findIndex((x) => x["id"] == currentId);
