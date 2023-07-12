@@ -5,16 +5,37 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title></title>
 	<style type="text/css">
-		
+		#isFrame, #isLink, #isHub {
+			display: none;
+		}
+
 	</style>
 </head>
 <body>
-	<p>This site is part of the cool webring club</p>
-	<a id="prev" href="" target="_top">prev</a><br/>
-	<a id="next" href="" target="_top">next</a><br/>
-	<a id="random" href="" target="_top" onclick="random();">random</a><br/>
+
+	<div id="noJS">
+		<p>Sorry this web ring requires Javascript to be enabled</p>
+	</div>
+	<div id="isFrame">
+		<p>This site is part of the cool webring club</p>
+		<a id="prev" target="_top">prev</a><br/>
+		<a id="next" target="_top">next</a><br/>
+		<a id="random" target="_top" onclick="random();">random</a><br/>
+	</div>
+	<div id="isLink">
+		Redirecting...
+	</div>
+	<div id="isHub">
+		<h1>Welcome to the cool web ring hub</h1>
+		<p>The follow sites are part of this ring:</p>
+		<ul id="hubList"></ul>
+		<p>For more info about the ring checkout the <a href="https://github.com/tekgo/simpleWebRing">Github repo</a></p>
+	</div>
 
 	<script type="text/javascript">
+
+		/* Data */
+
 		const sites = [
 			{
 				"id": "spa",
@@ -36,45 +57,132 @@
 			}
 		];
 
-		// Get the id parameter from the url.
-		const params1 = new URLSearchParams(window.location.search);
-		const currentId = params1.get("id");
-		// Match it to an existing site.
-		let existingIndex = sites.findIndex((x) => x["id"] == currentId);
+		/* Data end */
 
-		var prevURL = ""
-		var nextURL = ""
+		/* Common code */
 
-		if (existingIndex != -1) {
-			// If the existing site was found
-			var prevIndex = (existingIndex + sites.length - 1) % sites.length;
-			var nextIndex = (existingIndex + 1) % sites.length;
-			prevURL = sites[prevIndex].url;
-			nextURL = sites[nextIndex].url;
-		} else {
-			// Otherwise just grab the first and second items.
-			// Maybe change this later.
-			prevURL = sites[0].url;
-			nextURL = sites[1 % sites.length].url;
+		function isIframe () {
+			try {
+				return window.self !== window.top;
+			} catch (e) {
+				return true;
+			}
 		}
 
-		document.getElementById("prev").href = prevURL;
-		document.getElementById("next").href = nextURL;
+		function render() {
+			document.getElementById("noJS").style.display = "none";
 
-		// Click handler for the random link.
-		function random() {
-			let randomIndex = 0;
-			if (sites.length > 1) {
-				randomIndex = existingIndex;
-				while(randomIndex == existingIndex) {
-					randomIndex = Math.floor(Math.random()*sites.length);
-				}
+			// Get the id parameter from the url.
+			const params = new URLSearchParams(window.location.search);
+			const currentId = params.get("id");
+			// Match it to an existing site.
+			let existingIndex = sites.findIndex((x) => x["id"] == currentId);
+
+			var redirectMode = -1;
+			var isRedirect = false;
+			const modeParam = params.get("redirectMode");
+			switch (modeParam) {
+			case "prev":
+				redirectMode = 1;
+				isRedirect = true;
+				break;
+			case "next":
+				redirectMode = 2;
+				isRedirect = true;
+				break;
+			case "random":
+				redirectMode = 3;
+				isRedirect = true;
+				break;
+			default:
+				break;
 			}
-			randomURL = sites[randomIndex].url;
+
+			var prevURL = ""
+			var nextURL = ""
+
+			if (existingIndex != -1) {
+				// If the existing site was found
+				var prevIndex = (existingIndex + sites.length - 1) % sites.length;
+				var nextIndex = (existingIndex + 1) % sites.length;
+				prevURL = sites[prevIndex].url;
+				nextURL = sites[nextIndex].url;
+			} else {
+				// Otherwise just grab the first and second items.
+				// Maybe change this later.
+				prevURL = sites[0].url;
+				nextURL = sites[1 % sites.length].url;
+			}
+
+			// TODO: Add error handling if something is missing!
+
+			if (isIframe()) {
+				renderFrame(existingIndex, prevURL, nextURL);
+			} else if (isRedirect) {
+				redirect(redirectMode, existingIndex, prevURL, nextURL)
+			} else {
+				renderHub();
+			}
+		}
+
+		function randomURL(existingIndex) {
+			if (sites.length <= 1) {
+				return "";
+			}
+			let randomIndex = existingIndex;
+			while(randomIndex == existingIndex) {
+				randomIndex = Math.floor(Math.random()*sites.length);
+			}
+			return sites[randomIndex].url;
+		}
+
+		/* Hub mode code */
+
+		function renderHub() {
+			document.getElementById("isHub").style.display = "block";
+			let hubHTML = "";
+			for (var i = 0; i < sites.length; i++) {
+				let site = sites[i];
+				hubHTML += `<li><a href="${site["url"]}">${site["name"]}</a></li>`
+			}
+			document.getElementById("hubList").innerHTML = hubHTML;
+		}
+
+		/* Link mode code */
+
+		function redirect(mode, existingIndex, prevURL, nextURL) {
+			document.getElementById("isLink").style.display = "block";
+			switch (mode) {
+			case 1:
+				redirectTo(prevURL);
+			case 2:
+				redirectTo(nextURL);
+			case 3:
+				redirectTo(randomURL(existingIndex));
+			}
+		}
+
+		function redirectTo(url) {
+			window.location.replace(url);
+		}
+
+		/* Frame mode code */
+
+		function renderFrame(existingIndex, prevURL, nextURL) {
+			document.getElementById("isFrame").style.display = "block";
+			document.getElementById("prev").href = prevURL;
+			document.getElementById("next").href = nextURL;
+			document.getElementById("random").href = "#";
+		}
+
+		/// Click handler for the random link.
+		function random(existingIndex) {
+			randomURL = randomURL(existingIndex)
 			document.getElementById("random").href = randomURL;
 			document.getElementById("random").click()
 		}
 
+		render();
 	</script>
 </body>
 </html>
