@@ -4,6 +4,7 @@
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title></title>
+	<!--Style code to not display certain sections at launch-->
 	<style type="text/css">
 		#isFrame, #isLink, #isHub {
 			display: none;
@@ -13,22 +14,29 @@
 </head>
 <body>
 
+	<!--Section displayed when javascript is not enabled-->
 	<div id="noJS">
 		<p>Sorry this web ring requires Javascript to be enabled</p>
 	</div>
+
+	<!--Section displayed when the page is displayed in an iFrame-->
 	<div id="isFrame">
 		<p>This site is part of the cool webring club</p>
 		<a id="prev" target="_top">prev</a><br/>
 		<a id="next" target="_top">next</a><br/>
 		<a id="random" target="_top" onclick="random();">random</a><br/>
 	</div>
+
+	<!--Section displayed when the page is being used as a redirect from one member to another-->
 	<div id="isLink">
 		Redirecting...
 	</div>
+	
+	<!--Section displayed when the page is being viewed in a full browser as the hub page.-->
 	<div id="isHub">
 		<h1>Welcome to the cool web ring hub</h1>
 		<p>The follow sites are part of this ring:</p>
-		<ul id="hubList"></ul>
+		<ul id="hubList"></ul> <!--hublist will be autopopulated with the list of members in the renderHub() function below.-->
 		<p>For more info about the ring checkout the <a href="https://github.com/tekgo/simpleWebRing">Github repo</a></p>
 	</div>
 
